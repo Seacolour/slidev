@@ -1,5 +1,6 @@
 import type { ResolvedSlidevOptions } from '@slidev/types'
 import type { Plugin, UserConfig } from 'vite'
+import { cpus } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { slash, uniq } from '@antfu/utils'
@@ -132,7 +133,9 @@ export function createConfigPlugin(options: ResolvedSlidevOptions): Plugin {
         },
         publicDir: join(options.userRoot, 'public'),
         build: {
+          reportCompressedSize: false,
           rollupOptions: {
+            maxParallelFileOps: Math.max(1, Math.floor(cpus().length / 2)),
             output: {
               chunkFileNames(chunkInfo) {
                 const DEFAULT = 'assets/[name]-[hash].js'
@@ -171,7 +174,7 @@ export function createConfigPlugin(options: ResolvedSlidevOptions): Plugin {
             },
           },
         },
-        cacheDir: isInstalledGlobally.value ? join(options.cliRoot, 'node_modules/.vite') : undefined,
+        cacheDir: join(options.cliRoot, 'node_modules/.vite'),
       }
 
       function isSlidevClient(id: string) {
